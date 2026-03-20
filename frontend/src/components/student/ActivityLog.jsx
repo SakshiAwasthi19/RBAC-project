@@ -39,14 +39,15 @@ const ActivityLog = () => {
     const filteredActivities = activities.filter(activity => {
         // Tab Filter
         if (activeTab === 'upcoming') {
-            return activity.isUpcoming && activity.status !== 'rejected';
+            // Priority: Exclude attended/completed events from upcoming even if date is in future
+            return activity.isUpcoming && activity.status !== 'rejected' && activity.status !== 'attended' && activity.status !== 'approved';
         }
         if (activeTab === 'attended') {
-            return activity.status === 'attended' || activity.status === 'approved';
+            // Include explicitly attended OR verified (approved) past activities
+            return activity.status === 'attended' || (activity.status === 'approved' && !activity.isUpcoming);
         }
         if (activeTab === 'pending') {
             // Only show self-reported pending activities here
-            // Platform events that are registered but not yet attended should stay in 'Upcoming' or 'All'
             return activity.status === 'pending' && activity.type === 'activity';
         }
         // Domain Filter
@@ -56,6 +57,14 @@ const ActivityLog = () => {
     });
 
     const getStatusBadge = (status, isUpcoming, type) => {
+        // Priority: Attended/Verified status should always show over 'Upcoming' flag
+        if (status === 'attended') {
+            return <span className="bg-green-600 text-white text-xs px-2.5 py-0.5 rounded-full font-bold flex items-center shadow-sm"><CheckCircle2 className="w-3 h-3 mr-1" /> Attended</span>;
+        }
+        if (status === 'approved' && type === 'activity') {
+            return <span className="bg-green-100 text-green-800 text-xs px-2.5 py-0.5 rounded-full font-medium flex items-center border border-green-200"><CheckCircle2 className="w-3 h-3 mr-1" /> Verified</span>;
+        }
+
         if (isUpcoming && status !== 'rejected') {
             return <span className="bg-blue-100 text-blue-800 text-xs px-2.5 py-0.5 rounded-full font-medium border border-blue-200 shadow-sm flex items-center"><Calendar className="w-3 h-3 mr-1" /> Upcoming</span>;
         }

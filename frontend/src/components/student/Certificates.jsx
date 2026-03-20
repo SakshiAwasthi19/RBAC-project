@@ -44,10 +44,10 @@ const Certificates = () => {
             setLoading(true);
             const response = await studentAPI.getActivityLog();
             // Filter COMPLETED, APPROVED or PENDING (self-reported)
-            // CRITICAL: Exclude 'Upcoming' platform events
+            // CRITICAL: Exclude 'Upcoming' platform events UNLESS they are marked 'attended'
             const eligible = response.data.activities.filter(act =>
-                (act.status === 'attended' || act.status === 'approved' || act.status === 'pending') &&
-                !act.isUpcoming
+                act.status === 'attended' ||
+                ((act.status === 'approved' || act.status === 'pending') && !act.isUpcoming)
             );
             setActivities(eligible);
             setError(null);
