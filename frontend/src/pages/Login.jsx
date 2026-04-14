@@ -13,6 +13,7 @@ const Login = () => {
             const user = await login(data.email, data.password);
             if (user) {
                 if (user.userType === 'student') navigate('/student');
+                else if (user.userType === 'admin') navigate('/admin');
                 else navigate('/organization');
             }
         } catch (error) {

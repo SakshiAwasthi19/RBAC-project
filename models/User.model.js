@@ -21,8 +21,13 @@ const UserSchema = new mongoose.Schema({
     },
     userType: {
         type: String,
-        enum: ['student', 'organization'],
+        enum: ['student', 'organization', 'admin'],
         required: true,
+    },
+    school_id: {
+        type: String,
+        required: false,
+        index: true,
     },
     isActive: {
         type: Boolean,
@@ -35,10 +40,8 @@ const UserSchema = new mongoose.Schema({
     lastLogin: {
         type: Date,
     },
-    createdAt: {
-        type: Date,
-        default: Date.now,
-    },
+}, { 
+    timestamps: true 
 });
 
 // Pre-save hook to hash password

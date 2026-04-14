@@ -47,6 +47,11 @@ const StudentSchema = new mongoose.Schema({
     graduationYear: {
         type: String,
     },
+    school_id: {
+        type: String,
+        required: false,
+        index: true,
+    },
     phoneNumber: {
         type: String,
         required: [true, 'Phone number is required'],
@@ -58,6 +63,40 @@ const StudentSchema = new mongoose.Schema({
         url: String,
         publicId: String,
     },
+    activities: [{
+        title: { type: String, required: true },
+        description: String,
+        domain: {
+            type: String,
+            enum: ['Technical', 'Soft Skills', 'Community Service', 'Cultural', 'Sports', 'Environmental'],
+            required: true
+        },
+        aictePoints: { type: Number, required: true },
+        date: { type: Date, required: true },
+        semester: { type: Number, required: true },
+        eventId: { type: mongoose.Schema.Types.ObjectId, ref: 'Event' },
+        status: {
+            type: String,
+            enum: ['pending', 'approved', 'rejected'],
+            default: 'pending'
+        },
+        remarks: String,
+        certificates: [{
+            url: String,
+            publicId: String,
+            uploadedAt: Date
+        }],
+        photos: [{
+            url: String,
+            publicId: String,
+            uploadedAt: Date
+        }],
+        createdAt: { type: Date, default: Date.now }
+    }],
+    registeredEvents: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Event'
+    }],
     totalPoints: {
         type: Number,
         default: 0,
@@ -69,48 +108,10 @@ const StudentSchema = new mongoose.Schema({
         }],
         default: Array.from({ length: 8 }, (_, i) => ({ semester: i + 1, points: 0 })),
     },
-    activities: [{
-        title: { type: String, required: true },
-        description: String,
-        domain: {
-            type: String,
-            enum: ['Technical', 'Soft Skills', 'Community Service', 'Cultural', 'Sports', 'Environmental'],
-            required: true,
-        },
-        aictePoints: { type: Number, required: true, min: 0 },
-        date: { type: Date, required: true },
-        semester: { type: Number, required: true },
-        certificates: [{
-            url: String,
-            publicId: String,
-            uploadedAt: Date,
-        }],
-        photos: [{
-            url: String,
-            publicId: String,
-            uploadedAt: Date,
-        }],
-        eventId: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'Event',
-        },
-        status: {
-            type: String,
-            enum: ['pending', 'approved', 'rejected'],
-            default: 'pending',
-        },
-        remarks: String,
-        createdAt: { type: Date, default: Date.now },
-    }],
-    registeredEvents: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Event',
-    }],
     location: {
         type: {
             type: String,
             enum: ['Point'],
-            default: 'Point',
         },
         coordinates: {
             type: [Number], // [longitude, latitude]
@@ -121,30 +122,39 @@ const StudentSchema = new mongoose.Schema({
         state: String,
         pincode: String,
     },
-}, { timestamps: true });
+}, { 
+    timestamps: true 
+});
 
 // Index for geospacial queries
 StudentSchema.index({ location: '2dsphere' });
 
 // Method to calculate total points & semester-wise distribution
 StudentSchema.methods.calculateTotalPoints = function () {
+    // Filter for approved activities
     const approvedActivities = this.activities.filter(a => a.status === 'approved');
 
-    // 1. Total Points
-    this.totalPoints = approvedActivities.reduce((sum, act) => sum + act.aictePoints, 0);
+    // 1. Total Points - with robust NaN handling
+    this.totalPoints = approvedActivities.reduce((sum, act) => {
+        const points = Number(act.aictePoints) || 0;
+        return sum + points;
+    }, 0);
 
     // 2. Semester Wise Points
-    // Reset to 0 first
-    this.semesterWisePoints = Array.from({ length: 8 }, (_, i) => ({ semester: i + 1, points: 0 }));
+    // Reset to 0 first (ensure 8 semesters exist)
+    if (!this.semesterWisePoints || this.semesterWisePoints.length !== 8) {
+        this.semesterWisePoints = Array.from({ length: 8 }, (_, i) => ({ semester: i + 1, points: 0 }));
+    } else {
+        this.semesterWisePoints.forEach(p => p.points = 0);
+    }
 
     // Aggregation
     approvedActivities.forEach(act => {
-        // Ensure semester is valid 1-8
         if (act.semester >= 1 && act.semester <= 8) {
-            // Find the bucket (array index is semester - 1)
             const index = act.semester - 1;
             if (this.semesterWisePoints[index]) {
-                this.semesterWisePoints[index].points += act.aictePoints;
+                const points = Number(act.aictePoints) || 0;
+                this.semesterWisePoints[index].points += points;
             }
         }
     });

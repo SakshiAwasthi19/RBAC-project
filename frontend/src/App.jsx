@@ -11,6 +11,7 @@ import Events from './pages/Events'
 import EventDetails from './pages/EventDetails'
 import StudentDashboard from './pages/StudentDashboard'
 import OrganizationDashboard from './pages/OrganizationDashboard'
+import AdminDashboard from './pages/AdminDashboard'
 
 // Protected Route Component
 const ProtectedRoute = ({ children, roles = [] }) => {
@@ -34,12 +35,13 @@ const ProtectedRoute = ({ children, roles = [] }) => {
 const Dashboard = () => {
     const { user } = useAuth();
 
-    // If student, redirect to /student
     if (user?.userType === 'student') {
         return <Navigate to="/student" replace />;
     }
+    if (user?.userType === 'admin') {
+        return <Navigate to="/admin" replace />;
+    }
 
-    // Fallback/Org placeholder
     return (
         <Navigate to="/organization" replace />
     );
@@ -48,10 +50,11 @@ const Dashboard = () => {
 function App() {
     const location = useLocation();
     const isOrgPage = location.pathname.startsWith('/organization');
+    const isAdminPage = location.pathname.startsWith('/admin');
 
     return (
         <div className="min-h-screen bg-gray-50">
-            {!isOrgPage && <Navbar />}
+            {!isOrgPage && !isAdminPage && <Navbar />}
             <Routes>
                 {/* Public Routes */}
                 <Route path="/" element={<Home />} />
@@ -73,6 +76,12 @@ function App() {
                 <Route path="/organization/*" element={
                     <ProtectedRoute roles={['organization']}>
                         <OrganizationDashboard />
+                    </ProtectedRoute>
+                } />
+
+                <Route path="/admin/*" element={
+                    <ProtectedRoute roles={['admin']}>
+                        <AdminDashboard />
                     </ProtectedRoute>
                 } />
 

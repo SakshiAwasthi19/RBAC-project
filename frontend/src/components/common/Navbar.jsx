@@ -1,6 +1,6 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
-import { Home, Calendar, LayoutDashboard, Bell, User, LogOut, Menu } from 'lucide-react'
+import { Home, Calendar, LayoutDashboard, Bell, User, LogOut, Menu, Shield } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { studentAPI } from '../../services/api'
 
@@ -115,6 +115,15 @@ const Navbar = () => {
             ];
         }
 
+        // Check if user is admin
+        if (user.userType === 'admin') {
+            return [
+                { path: '/admin', label: 'Dashboard', icon: Shield },
+                { path: '/admin/organizations', label: 'Organizations', icon: LayoutDashboard },
+                { path: '/admin/activities', label: 'Activities', icon: Calendar },
+            ];
+        }
+
         // Standard links (Fallback/Public)
         return [
             { path: '/', label: 'Dashboard', icon: Home },
@@ -124,6 +133,7 @@ const Navbar = () => {
 
     const navLinks = getNavLinks()
     const isOrgUser = user?.userType === 'organization';
+    const isAdminUser = user?.userType === 'admin';
 
     return (
         <nav className="bg-white shadow-sm border-b sticky top-0 z-40">
@@ -268,7 +278,7 @@ const Navbar = () => {
                                                 <p className="text-xs text-gray-500 capitalize">{user.userType}</p>
                                             </div>
                                             <Link
-                                                to={user.userType === 'organization' ? '/organization/profile' : '/student/profile'}
+                                                to={isAdminUser ? '/admin' : user.userType === 'organization' ? '/organization/profile' : '/student/profile'}
                                                 className="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                                                 onClick={() => setShowDropdown(false)}
                                             >

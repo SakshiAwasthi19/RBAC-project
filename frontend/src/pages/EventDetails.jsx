@@ -93,6 +93,8 @@ const EventDetails = () => {
         )
     }
 
+    const isPast = new Date(event.startDateTime || event.endDateTime) < new Date();
+
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col">
 
@@ -117,6 +119,11 @@ const EventDetails = () => {
                             <span className="px-3 py-1 bg-blue-600/90 text-white rounded-full text-sm font-bold shadow-lg">
                                 {event.aictePoints} AICTE Points
                             </span>
+                            {isPast && (
+                                <span className="px-3 py-1 bg-gray-200 text-gray-800 rounded-full text-sm font-bold shadow-lg">
+                                    Past Event
+                                </span>
+                            )}
                         </div>
 
                         {/* Title */}
@@ -244,22 +251,33 @@ const EventDetails = () => {
                             {user && user.userType === 'student' && (
                                 <button
                                     onClick={handleRegister}
-                                    disabled={registering || isRegistered}
-                                    className={`w-full py-3.5 rounded-lg font-bold text-lg shadow-md transition-all active:scale-95 mb-4 ${isRegistered
-                                        ? 'bg-green-600 text-white cursor-default'
-                                        : 'bg-blue-600 text-white hover:bg-blue-700 hover:shadow-lg'
-                                        } disabled:opacity-70 disabled:cursor-not-allowed`}
+                                    disabled={registering || isRegistered || isPast}
+                                    className={`w-full py-3.5 rounded-lg font-bold text-lg shadow-md transition-all active:scale-95 mb-4 ${isPast
+                                        ? 'bg-gray-100 text-gray-500 cursor-not-allowed shadow-none'
+                                        : isRegistered
+                                            ? 'bg-green-600 text-white cursor-default'
+                                            : 'bg-blue-600 text-white hover:bg-blue-700 hover:shadow-lg'
+                                        } ${(registering || isRegistered) && !isPast ? 'opacity-70 cursor-not-allowed' : ''}`}
                                 >
-                                    {registering ? 'Processing...' : isRegistered ? 'Registered ✅' : 'Register for Event'}
+                                    {isPast ? 'Registration closed' : registering ? 'Processing...' : isRegistered ? 'Registered ✅' : 'Register for Event'}
                                 </button>
                             )}
 
-                            {!user && (
+                            {!user && !isPast && (
                                 <button
                                     onClick={() => navigate('/login')}
                                     className="w-full bg-blue-600 text-white py-3.5 rounded-lg font-bold hover:bg-blue-700 mb-4 transition-all shadow-md"
                                 >
                                     Login to Register
+                                </button>
+                            )}
+                            
+                            {!user && isPast && (
+                                <button
+                                    disabled
+                                    className="w-full bg-gray-100 text-gray-500 py-3.5 rounded-lg font-bold mb-4 cursor-not-allowed"
+                                >
+                                    Registration closed
                                 </button>
                             )}
 

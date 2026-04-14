@@ -25,6 +25,7 @@ const RegisterOrganization = ({ embedded = false }) => {
                 contactNumber: data.contactNumber,
                 // These are now optional
                 location: {
+                    type: 'Point',
                     coordinates: [77.5946, 12.9716] // Default coordinates
                 }
             };

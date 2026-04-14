@@ -9,6 +9,7 @@ const authRoutes = require('./routes/auth.routes');
 const studentRoutes = require('./routes/student.routes');
 const organizationRoutes = require('./routes/organization.routes');
 const eventRoutes = require('./routes/event.routes');
+const adminRoutes = require('./routes/admin.routes');
 
 const app = express();
 
@@ -39,7 +40,7 @@ app.use('/uploads', express.static(require('path').join(__dirname, 'uploads')));
 // Rate Limiting
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
+  max: 5000, // Increased limit for local development testing
   message: 'Too many requests from this IP, please try again later'
 });
 app.use('/api', limiter);
@@ -49,6 +50,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/students', studentRoutes);
 app.use('/api/organizations', organizationRoutes);
 app.use('/api/events', eventRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Health Check Endpoint
 app.get('/health', (req, res) => {
@@ -70,6 +72,7 @@ app.get('/', (req, res) => {
       students: '/api/students',
       organizations: '/api/organizations',
       events: '/api/events',
+      admin: '/api/admin',
       health: '/health'
     }
   });

@@ -13,6 +13,7 @@ const Events = () => {
     const [searchQuery, setSearchQuery] = useState('')
     const [selectedDomain, setSelectedDomain] = useState('All Domains')
     const [activeFilter, setActiveFilter] = useState('All Events')
+    const [activeTab, setActiveTab] = useState('upcoming')
     const navigate = useNavigate()
 
     const domains = [
@@ -80,6 +81,10 @@ const Events = () => {
         else setSelectedDomain(name);
     }
 
+    const upcomingEvents = events.filter(e => new Date(e.startDateTime || e.endDateTime) >= new Date())
+    const pastEvents = events.filter(e => new Date(e.startDateTime || e.endDateTime) < new Date())
+    const displayedEvents = activeTab === 'upcoming' ? upcomingEvents : pastEvents
+
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col">
 
@@ -141,22 +146,40 @@ const Events = () => {
                     ))}
                 </div>
 
+                {/* Tabs */}
+                <div className="mb-6 border-b border-gray-200">
+                    <nav className="-mb-px flex space-x-8" aria-label="Tabs">
+                        <button
+                            onClick={() => setActiveTab('upcoming')}
+                            className={`${activeTab === 'upcoming' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'} whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
+                        >
+                            Upcoming Events ({upcomingEvents.length})
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('past')}
+                            className={`${activeTab === 'past' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'} whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
+                        >
+                            Past Events ({pastEvents.length})
+                        </button>
+                    </nav>
+                </div>
+
                 {/* Events Grid */}
                 {loading ? (
                     <div className="flex justify-center py-24">
                         <LoadingSpinner size="lg" />
                     </div>
-                ) : events.length === 0 ? (
+                ) : displayedEvents.length === 0 ? (
                     <div className="text-center py-24 bg-white rounded-xl border border-dashed border-gray-300">
                         <div className="mx-auto w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mb-4">
                             <Search className="w-6 h-6 text-gray-400" />
                         </div>
-                        <h3 className="text-lg font-medium text-gray-900">No events found</h3>
+                        <h3 className="text-lg font-medium text-gray-900">No {activeTab} events found</h3>
                         <p className="text-gray-500 mt-1">Try adjusting your filters or search query</p>
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fade-in">
-                        {events.map(event => (
+                        {displayedEvents.map(event => (
                             <div
                                 key={event._id}
                                 className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden group border border-gray-100 flex flex-col h-full"

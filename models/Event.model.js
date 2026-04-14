@@ -86,49 +86,42 @@ const EventSchema = new mongoose.Schema({
         photo: String,
         bio: String,
     }],
-    registeredStudents: [{
-        studentId: { type: mongoose.Schema.Types.ObjectId, ref: 'Student' },
-        registeredAt: { type: Date, default: Date.now },
-        passId: { type: String, unique: true, sparse: true }, // For QR Code / Digital Pass
-        attended: { type: Boolean, default: false },
-        status: {
-            type: String,
-            enum: ['pending', 'approved', 'rejected'],
-            default: 'pending'
-        },
-        feedback: {
-            rating: { type: Number, min: 1, max: 5 },
-            comment: String,
-            submittedAt: Date,
-        },
-    }],
-    aiValidation: {
-        passed: { type: Boolean, default: false },
-        confidence: { type: Number, min: 0, max: 100 },
-        matchedCategory: String,
-        validatedAt: Date,
-        remarks: String,
-    },
-    status: {
+    school_id: {
         type: String,
-        enum: ['draft', 'pending', 'approved', 'rejected', 'ongoing', 'completed', 'cancelled'],
-        default: 'pending',
+        required: false,
         index: true,
-    },
-    adminRemarks: String,
-    views: {
-        type: Number,
-        default: 0,
-    },
-    rating: {
-        average: { type: Number, default: 0 },
-        count: { type: Number, default: 0 },
     },
     featured: {
         type: Boolean,
         default: false,
     },
-}, { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } });
+    status: {
+        type: String,
+        enum: ['pending', 'approved', 'rejected', 'completed', 'cancelled'],
+        default: 'pending',
+        index: true
+    },
+    rating: {
+        average: { type: Number, default: 0 },
+        count: { type: Number, default: 0 }
+    },
+    registeredStudents: [{
+        studentId: { type: mongoose.Schema.Types.ObjectId, ref: 'Student' },
+        registeredAt: { type: Date, default: Date.now },
+        passId: String,
+        attended: { type: Boolean, default: false },
+        status: { type: String, enum: ['pending', 'approved', 'rejected'], default: 'pending' },
+        feedback: {
+            rating: Number,
+            comments: String,
+            submittedAt: Date
+        }
+    }]
+}, { 
+    timestamps: true, 
+    toJSON: { virtuals: true }, 
+    toObject: { virtuals: true } 
+});
 
 // Virtual for registration count
 EventSchema.virtual('registrationCount').get(function () {
@@ -151,8 +144,9 @@ EventSchema.methods.isFull = function () {
 EventSchema.methods.isRegistrationOpen = function () {
     // DEV: Allow 'pending' status and registration until event ends
     const validStatuses = ['approved', 'pending'];
+    const currentStatus = this.status || 'pending';
     return (
-        validStatuses.includes(this.status) &&
+        validStatuses.includes(currentStatus) &&
         new Date() < this.endDateTime && // Relaxed from registrationDeadline
         !this.isFull()
     );

@@ -167,11 +167,11 @@ exports.createEvent = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Organization profile not found' });
         }
 
-        // DEV MODE: Verification check disabled for testing
-        // if (organization.verificationStatus !== 'verified') {
-        //     if (req.file) await deleteFromCloudinary(req.file.filename);
-        //     return res.status(403).json({ success: false, message: 'Your organization must be verified to create events. Please wait for admin approval.' });
-        // }
+        // Organization must be verified by admin to create events
+        if (organization.verificationStatus !== 'verified') {
+            if (req.file) await deleteFromCloudinary(req.file.filename);
+            return res.status(403).json({ success: false, message: 'Your organization must be verified to create events. Please wait for admin approval.' });
+        }
 
         // AI Validation
         const aiValidation = await validateActivity(title, description, domain, aictePoints);
@@ -380,7 +380,7 @@ exports.getDashboard = async (req, res) => {
         const organization = await Organization.findOne({ userId: req.user.userId }).populate('eventsHosted');
         if (!organization) return res.status(404).json({ success: false, message: 'Organization not found' });
 
-        const events = organization.eventsHosted || [];
+        const events = (organization.eventsHosted || []).filter(e => e != null);
 
         const stats = {
             totalEvents: events.length,

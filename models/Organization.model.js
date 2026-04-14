@@ -55,7 +55,6 @@ const OrganizationSchema = new mongoose.Schema({
         type: {
             type: String,
             enum: ['Point'],
-            default: 'Point',
         },
         coordinates: {
             type: [Number], // [longitude, latitude]
@@ -85,7 +84,14 @@ const OrganizationSchema = new mongoose.Schema({
         average: { type: Number, default: 0, min: 0, max: 5 },
         count: { type: Number, default: 0 },
     },
-}, { timestamps: true });
+    school_id: {
+        type: String,
+        required: false,
+        index: true,
+    },
+}, { 
+    timestamps: true 
+});
 
 // Index for geospacial queries
 OrganizationSchema.index({ location: '2dsphere' });

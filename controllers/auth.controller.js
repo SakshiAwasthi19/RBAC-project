@@ -1,6 +1,7 @@
 const User = require('../models/User.model');
 const Student = require('../models/Student.model');
 const Organization = require('../models/Organization.model');
+const Admin = require('../models/Admin.model');
 const { generateToken } = require('../middleware/auth.middleware');
 
 // @desc    Register a new user (Student or Organization)
@@ -119,6 +120,8 @@ exports.login = async (req, res) => {
             profile = await Student.findOne({ userId: user._id });
         } else if (user.userType === 'organization') {
             profile = await Organization.findOne({ userId: user._id });
+        } else if (user.userType === 'admin') {
+            profile = await Admin.findOne({ userId: user._id });
         }
 
         if (!profile) {
@@ -161,6 +164,8 @@ exports.getCurrentUser = async (req, res) => {
             profile = await Student.findOne({ userId: user._id });
         } else if (user.userType === 'organization') {
             profile = await Organization.findOne({ userId: user._id });
+        } else if (user.userType === 'admin') {
+            profile = await Admin.findOne({ userId: user._id });
         }
 
         res.status(200).json({
@@ -205,5 +210,71 @@ exports.changePassword = async (req, res) => {
     } catch (err) {
         console.error('Change pwd Error:', err.message);
         res.status(500).json({ success: false, message: 'Server error' });
+    }
+};
+
+// @desc    Register a new admin (protected by ADMIN_SECRET)
+// @route   POST /api/auth/register-admin
+// @access  Public (but requires secret key)
+exports.registerAdmin = async (req, res) => {
+    try {
+        const { email, password, fullName, adminSecret } = req.body;
+
+        // 1. Validate secret
+        const secret = process.env.ADMIN_SECRET || 'pointmate-admin-secret';
+        if (adminSecret !== secret) {
+            return res.status(403).json({ success: false, message: 'Invalid admin secret' });
+        }
+
+        // 2. Validate required fields
+        if (!email || !password || !fullName) {
+            return res.status(400).json({ success: false, message: 'Please provide email, password, and full name' });
+        }
+
+        // 3. Check if user exists
+        const userExists = await User.findOne({ email });
+        if (userExists) {
+            return res.status(400).json({ success: false, message: 'Email already registered' });
+        }
+
+        // 4. Create User
+        const user = await User.create({
+            email,
+            password,
+            userType: 'admin',
+            school_id: 'ADMIN',
+        });
+
+        // 5. Create Admin Profile
+        let profile;
+        try {
+            profile = await Admin.create({
+                userId: user._id,
+                email: user.email,
+                fullName,
+            });
+        } catch (profileError) {
+            await User.findByIdAndDelete(user._id);
+            throw profileError;
+        }
+
+        // 6. Generate Token
+        const token = generateToken(user._id, user.userType);
+
+        // 7. Response
+        res.status(201).json({
+            success: true,
+            token,
+            user: {
+                id: user._id,
+                email: user.email,
+                userType: user.userType
+            },
+            profile
+        });
+
+    } catch (err) {
+        console.error('Register Admin Error:', err.message);
+        res.status(500).json({ success: false, message: 'Server error during admin registration', error: err.message });
     }
 };

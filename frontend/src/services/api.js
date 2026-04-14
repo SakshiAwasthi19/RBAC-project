@@ -108,5 +108,16 @@ export const eventsAPI = {
     registerForEvent: (eventId) => api.post(`/events/${eventId}/register`),
     getEventPass: (eventId) => api.get(`/events/${eventId}/pass`)
 };
+// Admin APIs
+export const adminAPI = {
+    getDashboard: () => api.get('/admin/dashboard'),
+    getAllOrganizations: (filters) => api.get('/admin/organizations', { params: filters }),
+    updateOrganizationStatus: (orgId, data) => api.patch(`/admin/organizations/${orgId}/status`, data),
+    deleteOrganization: (orgId) => api.delete(`/admin/organizations/${orgId}`),
+    getAllEvents: (filters) => api.get('/admin/events', { params: filters }),
+    deleteEvent: (eventId) => api.delete(`/admin/events/${eventId}`),
+    getAllActivities: (filters) => api.get('/admin/activities', { params: filters }),
+    updateActivityStatus: (activityId, data) => api.patch(`/admin/activities/${activityId}/status`, data),
+};
 
 export default api;

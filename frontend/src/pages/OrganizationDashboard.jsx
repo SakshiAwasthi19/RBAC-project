@@ -120,14 +120,22 @@ const OrganizationDashboard = () => {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                                 <button
                                     onClick={() => navigate('/organization/create-event')}
-                                    className="group bg-blue-600 text-white p-8 rounded-xl hover:bg-blue-700 transition-all shadow-lg flex items-center justify-center space-x-4 transform hover:-translate-y-1"
+                                    disabled={dashboardData?.organization?.verificationStatus !== 'verified'}
+                                    className={`group p-8 rounded-xl transition-all flex items-center justify-center space-x-4 
+                                        ${dashboardData?.organization?.verificationStatus === 'verified' 
+                                            ? 'bg-blue-600 text-white shadow-lg hover:bg-blue-700 transform hover:-translate-y-1' 
+                                            : 'bg-gray-200 text-gray-500 border-2 border-gray-300 cursor-not-allowed opacity-80'}`}
                                 >
-                                    <div className="p-3 bg-white/20 rounded-full group-hover:scale-110 transition-transform">
+                                    <div className={`p-3 rounded-full transition-transform ${dashboardData?.organization?.verificationStatus === 'verified' ? 'bg-white/20 group-hover:scale-110' : 'bg-gray-300 text-gray-400'}`}>
                                         <Plus className="w-8 h-8" />
                                     </div>
                                     <div className="text-left">
                                         <span className="text-xl font-bold block">Create New Event</span>
-                                        <span className="text-blue-100 text-sm">Launch a new point opportunity</span>
+                                        <span className={dashboardData?.organization?.verificationStatus === 'verified' ? "text-blue-100 text-sm" : "text-red-500 text-sm font-semibold"}>
+                                            {dashboardData?.organization?.verificationStatus === 'verified' 
+                                                ? 'Launch a new point opportunity' 
+                                                : 'Pending Admin Verification'}
+                                        </span>
                                     </div>
                                 </button>
 
@@ -185,14 +193,14 @@ const OrganizationDashboard = () => {
                                                             </div>
                                                         </td>
                                                         <td className="py-4 px-6">
-                                                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${event.status === 'approved' ? 'bg-green-100 text-green-800' :
-                                                                    event.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                                                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${(event.status || 'pending') === 'approved' ? 'bg-green-100 text-green-800' :
+                                                                    (event.status || 'pending') === 'pending' ? 'bg-yellow-100 text-yellow-800' :
                                                                         'bg-gray-100 text-gray-800'
                                                                 }`}>
-                                                                <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${event.status === 'approved' ? 'bg-green-600' :
-                                                                        event.status === 'pending' ? 'bg-yellow-600' : 'bg-gray-600'
+                                                                <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${(event.status || 'pending') === 'approved' ? 'bg-green-600' :
+                                                                        (event.status || 'pending') === 'pending' ? 'bg-yellow-600' : 'bg-gray-600'
                                                                     }`}></span>
-                                                                {event.status.charAt(0).toUpperCase() + event.status.slice(1)}
+                                                                {(event.status || 'pending').charAt(0).toUpperCase() + (event.status || 'pending').slice(1)}
                                                             </span>
                                                         </td>
                                                         <td className="py-4 px-6 text-right">

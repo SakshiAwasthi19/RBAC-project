@@ -1,5 +1,6 @@
 const Student = require('../models/Student.model');
 const User = require('../models/User.model');
+const Activity = require('../models/Activity.model');
 const Notification = require('../models/Notification.model');
 const { uploadToCloudinary, deleteFromCloudinary } = require('../utils/cloudinary.config');
 const fs = require('fs');
@@ -138,47 +139,64 @@ exports.uploadProfilePicture = async (req, res) => {
 // 4. Get Points Summary
 exports.getPointsSummary = async (req, res) => {
     try {
+        console.log("Triggered getPointsSummary for user:", req.user?.userId);
         const student = await Student.findOne({ userId: req.user.userId });
-        if (!student) return res.status(404).json({ success: false, message: 'Student not found' });
+        if (!student) {
+            console.log("Student not found in DB");
+            return res.status(404).json({ success: false, message: 'Student not found' });
+        }
 
+        console.log("Student found. Calculating points...");
+        const oldPoints = student.totalPoints;
         const totalPoints = student.calculateTotalPoints();
+        
+        // Self-healing: Update DB if mismatch found
+        if (oldPoints !== totalPoints) {
+            console.log(`[REPAIR] Total points mismatch for ${student.firstName}: ${oldPoints} -> ${totalPoints}. Saving update.`);
+            await student.save();
+        }
+        
+        console.log("Calculated total points:", totalPoints);
         const progress = student.getProgress();
+        console.log("Calculated progress...");
 
         const pointsByCategory = {
-            'Technical': 0,
-            'Soft Skills': 0,
-            'Community Service': 0,
-            'Cultural': 0,
-            'Sports': 0,
-            'Environmental': 0
+            'Technical': 0, 'Soft Skills': 0, 'Community Service': 0,
+            'Cultural': 0, 'Sports': 0, 'Environmental': 0
         };
 
-        const approvedActivities = student.activities.filter(a => a.status === 'approved');
+        const approvedActivities = (student.activities || []).filter(a => a != null && a.status === 'approved');
         approvedActivities.forEach(act => {
-            if (pointsByCategory[act.domain] !== undefined) {
-                pointsByCategory[act.domain] += act.aictePoints;
+            // Robust domain matching
+            const domain = act.domain || 'Technical'; // Fallback to Technical if missing
+            if (pointsByCategory[domain] !== undefined) {
+                pointsByCategory[domain] += Number(act.aictePoints) || 0;
+            } else {
+                // If it's a non-standard domain, add it to Technical as a catch-all for the UI
+                pointsByCategory['Technical'] += Number(act.aictePoints) || 0;
             }
         });
 
-        const recentActivities = student.activities
-            .filter(a => a.status === 'approved')
+        const recentActivities = (student.activities || [])
+            .filter(a => a != null && a.status === 'approved')
             .sort((a, b) => new Date(b.date) - new Date(a.date))
             .slice(0, 5);
 
+        console.log("Sending successful points summary response");
         res.status(200).json({
             success: true,
             data: {
                 totalPoints,
                 progress,
-                semesterWisePoints: student.semesterWisePoints,
+                semesterWisePoints: student.semesterWisePoints || [],
                 pointsByCategory,
                 recentActivities
             }
         });
 
     } catch (error) {
-        console.error('Points Summary Error:', error.message);
-        res.status(500).json({ success: false, message: 'Server Error' });
+        console.error('Points Summary Error TRACE:', error);
+        res.status(500).json({ success: false, message: 'Server Error', error: error.message });
     }
 };
 
@@ -226,7 +244,18 @@ exports.addActivity = async (req, res) => {
         student.activities.push(newActivity);
         await student.save();
 
-        res.status(201).json({ success: true, data: student.activities[student.activities.length - 1], message: 'Activity added successfully' });
+        // [SYNC] Create standalone Activity for Admin verification
+        // This ensures the Admin dashboard can find it via Activity.find()
+        const activityDoc = await Activity.create({
+            studentId: student._id,
+            ...newActivity
+        });
+
+        res.status(201).json({ 
+            success: true, 
+            data: student.activities[student.activities.length - 1], 
+            message: 'Activity added and sent for admin verification' 
+        });
 
     } catch (error) {
         console.error('Add Activity Error:', error.message);
@@ -327,13 +356,27 @@ exports.getActivityLog = async (req, res) => {
             })
             .populate({
                 path: 'registeredEvents',
-                select: 'title domain aictePoints startDateTime endDateTime status registeredStudents organizedBy'
+                select: 'title domain aictePoints startDateTime endDateTime status registeredStudents organizedBy location'
             });
 
         if (!student) return res.status(404).json({ success: false, message: 'Student not found' });
 
+        console.log('[ActivityLog] Student ID:', student._id.toString());
+        console.log('[ActivityLog] registeredEvents count:', (student.registeredEvents || []).length);
+        if (student.registeredEvents && student.registeredEvents.length > 0) {
+            student.registeredEvents.forEach((e, i) => {
+                if (!e) { console.log(`[ActivityLog] Event ${i}: NULL (populate failed)`); return; }
+                console.log(`[ActivityLog] Event ${i}: "${e.title}", registeredStudents count: ${(e.registeredStudents || []).length}`);
+                if (e.registeredStudents) {
+                    e.registeredStudents.forEach((r, j) => {
+                        console.log(`  [Reg ${j}] studentId: ${r.studentId}, status: ${r.status}, attended: ${r.attended}`);
+                    });
+                }
+            });
+        }
+
         // 1. Process Self-Reported Activities
-        let normalizedActivities = student.activities.map(act => ({
+        let normalizedActivities = (student.activities || []).map(act => ({
             _id: act._id,
             type: 'activity', // Self-reported
             title: act.title,
@@ -351,8 +394,14 @@ exports.getActivityLog = async (req, res) => {
         const normalizedEvents = [];
         if (student.registeredEvents && student.registeredEvents.length > 0) {
             student.registeredEvents.forEach(event => {
+                if (!event || !event.registeredStudents) {
+                    console.log('[ActivityLog] Skipping null/invalid event during processing');
+                    return;
+                }
                 // Find my specific registration
-                const myReg = event.registeredStudents.find(r => r.studentId.toString() === student._id.toString());
+                const myReg = event.registeredStudents.find(r => r.studentId && r.studentId.toString() === student._id.toString());
+
+                console.log(`[ActivityLog] Processing event "${event.title}": myReg found = ${!!myReg}`);
 
                 if (myReg) {
                     const now = new Date();

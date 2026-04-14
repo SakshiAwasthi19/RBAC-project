@@ -6,6 +6,11 @@ PointMate is a comprehensive platform designed to help Vishweswaraya Technologic
 
 ## 📸 App Preview
 
+### 🛡️ Admin Dashboard
+![Admin Dashboard](screenshots/admin_dashboard.png)
+
+---
+
 ### 🏠 Homepage
 ![Homepage](screenshots/homepage.png)
 
@@ -62,11 +67,16 @@ PointMate is a comprehensive platform designed to help Vishweswaraya Technologic
 - **Live Notifications**: Instant alerts for attendance marking, activity approvals, and upcoming events.
 
 ### For Organizations (Colleges/NGOs/Bodies)
-- **Event Management**: Easily create and manage AICTE-approved campus events.
-- **AI-Validation**: Platform uses Google's Generative AI to ensure events meet official AICTE guidelines before posting.
-- **Attendance System**: Quick attendance marking for students, which automatically syncs points to their profiles.
+- **Event Management**: Create and manage AICTE-approved campus events (restricted to verified organizations).
+- **AI-Validation**: Platform uses Google's Generative AI to ensure events meet official AICTE guidelines.
+- **Attendance System**: Quickly mark attendance, which automatically syncs points to student profiles.
 - **Registration Review**: Streamlined interface to approve or reject student event registrations.
-- **Activity Verification**: Review self-reported activity claims from students.
+
+### For Admins
+- **Global Oversight**: Centralized dashboard to monitor students, organizations, and events.
+- **Organization Verification**: Review and approve/reject new organization registrations to ensure platform integrity.
+- **Activity Verification**: Verify self-reported student activities to award AICTE points.
+- **Data Integrity**: Manage platform users and ensure cascading deletion of inactive organizations.
 
 ---
 
