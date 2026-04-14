@@ -176,7 +176,7 @@ exports.createEvent = async (req, res) => {
         // AI Validation
         const aiValidation = await validateActivity(title, description, domain, aictePoints);
 
-        if (aiValidation.passed === false || aiValidation.confidence < 80) {
+        if (aiValidation.passed === false || aiValidation.confidence < 50) {
             if (req.file) await deleteFromCloudinary(req.file.filename);
             return res.status(400).json({
                 success: false,
@@ -253,7 +253,7 @@ exports.createEvent = async (req, res) => {
                 validatedAt: aiValidation.validatedAt,
                 remarks: aiValidation.reasoning
             },
-            status: aiValidation.confidence >= 80 ? 'approved' : 'pending' // As per prompt fallback logic
+            status: aiValidation.confidence >= 50 ? 'approved' : 'pending' // As per prompt fallback logic
         });
 
         await event.save();
@@ -263,9 +263,9 @@ exports.createEvent = async (req, res) => {
 
         res.status(201).json({
             success: true,
-            message: aiValidation.confidence >= 80
-                ? 'Event created and auto-approved (AI confidence >= 80%)'
-                : 'Event created and pending admin review (AI confidence < 80%)',
+            message: aiValidation.confidence >= 50
+                ? 'Event created and auto-approved (AI confidence >= 50%)'
+                : 'Event created and pending admin review (AI confidence < 50%)',
             data: {
                 event,
                 aiValidation: {

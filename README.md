@@ -84,11 +84,12 @@ PointMate is a comprehensive platform designed to help Vishweswaraya Technologic
 
 ### Frontend
 - **React.js**: Core UI library.
-- **Vite**: Modern frontend build tool.
+- **Next.js**: Frontend framework/runtime for the client application.
 - **Tailwind CSS**: Modern utility-first styling.
 - **Framer Motion**: Smooth animations.
 - **Lucide React**: Clean iconography.
 - **React Hook Form**: Efficient form management.
+- **React Router DOM**: Client-side route and dashboard flow handling.
 - **Axios**: API communication.
 
 ### Backend
@@ -111,7 +112,7 @@ PointMate is a comprehensive platform designed to help Vishweswaraya Technologic
 ### 1. Clone the repository
 ```bash
 git clone <repository-url>
-cd Pointmate
+cd Pointmate_RBAC
 ```
 
 ### 2. Backend Setup
@@ -129,6 +130,9 @@ cp .env.example .env
 cd frontend
 # Install frontend dependencies
 npm install
+
+# Optional: if not already set at root, define frontend API URL for Next.js
+# NEXT_PUBLIC_API_URL=http://localhost:5000/api
 ```
 
 ### 4. Running the Project
@@ -138,6 +142,13 @@ npm run dev
 
 # Run Frontend (from /frontend)
 npm run dev
+```
+
+### 5. Frontend Production Commands (Next.js)
+```bash
+# From /frontend
+npm run build
+npm run start
 ```
 
 ---
@@ -152,7 +163,8 @@ Pointmate/
 ├── routes/             # API endpoints
 ├── utils/              # Helper functions and AI validators
 ├── uploads/            # Local storage fallback for media
-├── frontend/           # React application
+├── frontend/           # Next.js frontend application
+│   ├── pages/          # Next.js entry pages and catch-all route
 │   ├── src/
 │   │   ├── components/ # Reusable UI components
 │   │   ├── context/    # Auth and State management

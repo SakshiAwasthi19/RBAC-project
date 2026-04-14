@@ -8,6 +8,8 @@ node_modules/
 dist/
 build/
 frontend/dist/
+.next/
+frontend/.next/
 
 # System files
 .DS_Store

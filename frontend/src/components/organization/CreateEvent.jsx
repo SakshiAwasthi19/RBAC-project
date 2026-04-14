@@ -113,7 +113,7 @@ const CreateEvent = () => {
             if (validation) {
                 setValidationResult(validation)
 
-                if (validation.passed && validation.confidence >= 80) {
+                if (validation.passed && validation.confidence >= 50) {
                     toast.success(`Event created successfully! AI Confidence: ${validation.confidence}%`)
                     setTimeout(() => {
                         navigate('/organization/events')
@@ -435,7 +435,7 @@ const CreateEvent = () => {
                     <h4 className="text-base font-bold text-blue-900 mb-1">AI Validation Process</h4>
                     <p className="text-sm text-blue-800 leading-relaxed">
                         All events are validated using AI to ensure they meet AICTE activity criteria.
-                        Events achieving a confidence score of <strong>80% or higher</strong> are approved automatically.
+                        Events achieving a confidence score of <strong>50% or higher</strong> are approved automatically.
                         Lower scores may require manual review.
                     </p>
                 </div>

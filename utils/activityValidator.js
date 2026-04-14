@@ -65,7 +65,7 @@ const validateActivity = async (title, description, domain, aictePoints) => {
         const validationResult = JSON.parse(jsonStr);
 
         // AI Confidence Check
-        if (validationResult.confidence < 80) {
+        if (validationResult.confidence < 50) {
             validationResult.isValid = false;
             validationResult.reasoning = `Confidence score too low (${validationResult.confidence}%). ${validationResult.reasoning}`;
         }
