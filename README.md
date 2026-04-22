@@ -4,57 +4,48 @@ PointMate is a comprehensive platform designed to help Vishweswaraya Technologic
 
 ---
 
+## 🔗 Live URLs
+
+- **Frontend**: [https://rbac-project-sigma.vercel.app/](https://rbac-project-sigma.vercel.app/)
+- **Backend**: [https://rbac-project-0334.onrender.com](https://rbac-project-0334.onrender.com)
+
 ## 📸 App Preview
 
-### 🛡️ Admin Dashboard
-![Admin Dashboard](screenshots/admin_dashboard.png)
+<div align="center">
+  <table>
+    <tr>
+      <td align="center"><b>🛡️ Admin Dashboard</b><br><img src="screenshots/admin_dashboard.png" width="400" /></td>
+      <td align="center"><b>🏠 Homepage</b><br><img src="screenshots/homepage.png" width="400" /></td>
+    </tr>
+    <tr>
+      <td align="center"><b>📅 Events Page</b><br><img src="screenshots/events_page.png" width="400" /></td>
+      <td align="center"><b>🎓 Student Dashboard</b><br><img src="screenshots/student_dashboard.png" width="400" /></td>
+    </tr>
+    <tr>
+      <td align="center"><b>📋 Activity Log</b><br><img src="screenshots/activity_log.png" width="400" /></td>
+      <td align="center"><b>🏅 Certificates Page</b><br><img src="screenshots/certificates_page.png" width="400" /></td>
+    </tr>
+    <tr>
+      <td align="center"><b>📝 Self Report Page</b><br><img src="screenshots/self_report.png" width="400" /></td>
+      <td align="center"><b>🏢 Organization Dashboard</b><br><img src="screenshots/org_dashboard.png" width="400" /></td>
+    </tr>
+    <tr>
+      <td align="center"><b>➕ Organization – Event Creation</b><br><img src="screenshots/org_event_creation.png" width="400" /></td>
+      <td align="center"><b>⚙️ Organization – Event Management</b><br><img src="screenshots/org_event_management.png" width="400" /></td>
+    </tr>
+  </table>
+</div>
 
 ---
 
-### 🏠 Homepage
-![Homepage](screenshots/homepage.png)
+
+## 🔑 Admin Test Credentials
+
+- **Email**: admin2@pointmate.com
+- **Password**: admin123
 
 ---
 
-### 📅 Events Page
-![Events Page](screenshots/events_page.png)
-
----
-
-### 🎓 Student Dashboard
-![Student Dashboard](screenshots/student_dashboard.png)
-
----
-
-### 📋 Activity Log
-![Activity Log](screenshots/activity_log.png)
-
----
-
-### 🏅 Certificates Page
-![Certificates Page](screenshots/certificates_page.png)
-
----
-
-### 📝 Self Report Page
-![Self Report Page](screenshots/self_report.png)
-
----
-
-### 🏢 Organization Dashboard
-![Organization Dashboard](screenshots/org_dashboard.png)
-
----
-
-### ➕ Organization – Event Creation
-![Event Creation Page](screenshots/org_event_creation.png)
-
----
-
-### ⚙️ Organization – Event Management
-![Event Management Page](screenshots/org_event_management.png)
-
----
 
 ## 🚀 Features
 
@@ -83,22 +74,27 @@ PointMate is a comprehensive platform designed to help Vishweswaraya Technologic
 ## 🛠️ Tech Stack
 
 ### Frontend
-- **React.js**: Core UI library.
-- **Next.js**: Frontend framework/runtime for the client application.
+- **React.js & Next.js 16**: Core UI library and framework.
 - **Tailwind CSS**: Modern utility-first styling.
 - **Framer Motion**: Smooth animations.
 - **Lucide React**: Clean iconography.
 - **React Hook Form**: Efficient form management.
-- **React Router DOM**: Client-side route and dashboard flow handling.
+- **React Router DOM**: Client-side route management.
 - **Axios**: API communication.
+- **Recharts**: Data visualization for points tracking.
+- **React Hot Toast**: Beautiful, interactive notifications.
+- **Date-fns**: Robust date manipulation.
 
 ### Backend
-- **Node.js**: Server-side runtime.
-- **Express.js**: Backend framework.
+- **Node.js & Express.js**: Server-side runtime and framework.
 - **MongoDB & Mongoose**: NoSQL database and ORM.
-- **JWT**: Secure token-based authentication.
-- **Cloudinary**: Cloud-based media storage (Posters/Certificates).
+- **JWT (JSON Web Token)**: Secure token-based authentication.
+- **Bcryptjs**: Password hashing and security.
+- **Cloudinary**: Cloud-based media storage for posters and certificates.
 - **Google Generative AI**: AI engine for event validation.
+- **Multer**: Handling multipart/form-data for file uploads.
+- **QR Code**: Generating unique event registration codes.
+- **Express Rate Limit**: Basic security against brute force.
 
 ---
 
